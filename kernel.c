@@ -4,6 +4,7 @@
 void readString(char*);
 void printString(char*);
 void readSector(char*, int);
+void handleInterrupt21(int, int, int, int);
 int mod(int, int);
 int div(int, int);
 
@@ -35,10 +36,16 @@ int main()
 
 	// TASK 3 :
 
-	char buffer[512];
-	readSector(buffer, 30);
-	printString(buffer);
+	// char buffer[512];
+	// readSector(buffer, 30);
+	// printString(buffer);
+
+
+	//Task 4 :
 	
+	makeInterrupt21();
+
+	interrupt(0x21,0,0,0,0);
 	while(1); // sagheer mesh fahem 7aga 
 
 	// return 1;
@@ -123,4 +130,7 @@ void readSector(char* buffer, int sector)
 
 
 
-
+void handleInterrupt21(int ax, int bx, int cx, int dx)
+{
+	printString("The Factory of Chairs + Kammola !\0");
+}
