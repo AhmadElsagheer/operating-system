@@ -27,18 +27,19 @@ int main()
 	//TASK 2 : 
 	readString(c);
 	printString(c);
+
 	while(1); // sagheer mesh fahem 7aga 
 
 	// return 1;
 }
 
 
-/**
 
 
 
 
-*/
+//Task 2
+
 void readString(char* line){
 	int i = 0;
 	while(1)
@@ -48,9 +49,9 @@ void readString(char* line){
 
 			if(cc ==  0xd)
 			{
-
+				line[i++] = cc;			
 				line[i++] = 0xa;
-				line[i++] = '\0';
+				line[i++] = '\0';	
 				break;
 			}
 			else if(cc == 0x8)
@@ -58,7 +59,9 @@ void readString(char* line){
 			interrupt(0x10, 0xE*256+cc, 0, 0, 0);
 			line[i++] = cc;
 	}
-	interrupt(0x10, 0xE*256+0xd, 0, 0, 0);
+	interrupt(0x10, 0xE*256+0xa, 0, 0, 0); // line feed
+	interrupt(0x10, 0xE*256+0xd, 0, 0, 0); // cursor return
+	// interrupt(0x10, 0xE*256+0xa, 0, 0, 0);
 }
 // TASK 1 :
 void printString(char* chars){
