@@ -15,11 +15,7 @@ int main()
 	
 	
 	// TASK 1 : 
-	//STEP 1 :
-
 	// printString("Hello World\0");
-
-	// //STEP 2:
 
 	// while(1)
 	// {
@@ -29,34 +25,32 @@ int main()
 	// 			break;
 	// 			interrupt(0x10, 0xE*256+cc, 0, 0, 0);
 	// }
+
 	//TASK 2 : 
 	// printString("Enter a line: \0");
 	// readString(c);
 	// printString(c);
 
 	// TASK 3 :
-
 	// char buffer[512];
 	// readSector(buffer, 30);
 	// printString(buffer);
 
 
-	//Task 4 :
-	
+	//TASK 4 :
+	// makeInterrupt21();
+	// interrupt(0x21,0,0,0,0);
+
+	//TASK 5
+	char line[80];
 	makeInterrupt21();
+	interrupt(0x21,1,line,0,0);
+	interrupt(0x21,0,line,0,0);
+	interrupt(0x21,3,line,0,0);
 
-	interrupt(0x21,0,0,0,0);
-	while(1); // sagheer mesh fahem 7aga 
-
-	// return 1;
+	while(1); // sagheer fehem akheern
 }
 
-
-
-
-
-
-//Task 2
 
 void readString(char* line){
 	int i = 0;
@@ -72,18 +66,21 @@ void readString(char* line){
 				line[i++] = '\0';	
 				break;
 			}
-			else if(cc == 0x8)
+			else if(cc == 0x8 && i > 0)
+			{
+				interrupt(0x10, 0xE*256+cc, 0, 0, 0);
+				interrupt(0x10, 0xE*256+'\0', 0, 0, 0);
 				i--;
+			}	
+			else
+				line[i++] = cc;
 			interrupt(0x10, 0xE*256+cc, 0, 0, 0);
-			line[i++] = cc;
+			
 	}
 	interrupt(0x10, 0xE*256+0xa, 0, 0, 0); // line feed
-	interrupt(0x10, 0xE*256+0xd, 0, 0, 0); // cursor return
-	// interrupt(0x10, 0xE*256+0xa, 0, 0, 0);
+	interrupt(0x10, 0xE*256+0xd, 0, 0, 0); // carriage return
 }
 
-
-// TASK 1 :
 void printString(char* chars){
 
 	int i = 0;
@@ -112,12 +109,10 @@ int mod(int a, int b) {
 }
 
 /*
-
-relative sector = ( sector MOD 18 ) + 1
-head = ( sector / 18 ) MOD 2
-/*this is integer division, so the result should be rounded down
-track = ( sector / 36 )
-
+	relative sector = ( sector MOD 18 ) + 1
+	head = ( sector / 18 ) MOD 2
+	this is integer division, so the result should be rounded down
+	track = ( sector / 36 )
 */
 
 void readSector(char* buffer, int sector)
@@ -128,9 +123,15 @@ void readSector(char* buffer, int sector)
 	interrupt(0x13,2*256+1,buffer,track*256+rSector,head*256);
 }
 
-
-
 void handleInterrupt21(int ax, int bx, int cx, int dx)
 {
-	printString("The Factory of Chairs + Kammola !\0");
+
+	if(ax == 0)
+		printString(bx);
+	else if(ax == 1)
+		readString(bx);
+	else if (ax == 2)
+		readSector(bx, cx);
+	else 
+		printString("an error message :3");
 }
