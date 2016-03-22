@@ -1,6 +1,6 @@
 
 
-
+void readFile(char*, char*);
 void readString(char*);
 void printString(char*);
 void readSector(char*, int);
@@ -11,7 +11,7 @@ int div(int, int);
 int main() 
 {
 
-	char c[80];
+	// char c[80];
 	
 	
 	// TASK 1 : 
@@ -22,7 +22,7 @@ int main()
 
 	// 		char cc = interrupt(0x16,0,0,0,0);
 	// 		if(cc == 0xd)	
-	// 			break;
+	// 			break;w
 	// 			interrupt(0x10, 0xE*256+cc, 0, 0, 0);
 	// }
 
@@ -42,13 +42,21 @@ int main()
 	// interrupt(0x21,0,0,0,0);
 
 	//TASK 5
-	char line[80];
-	makeInterrupt21();
-	interrupt(0x21,1,line,0,0);
-	interrupt(0x21,0,line,0,0);
-	interrupt(0x21,3,line,0,0);
+	// char line[80];
+	// makeInterrupt21();
+	// interrupt(0x21,1,line,0,0);
+	// interrupt(0x21,0,line,0,0);
+	// interrupt(0x21,3,line,0,0);
 
-	while(1); // sagheer fehem akheern
+	// char buffer[13312]; 
+	makeInterrupt21();
+	interrupt(0x21,0,"kammola\0",0,0);
+	// interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
+	// interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
+	
+	while(1); /*hang up*/
+
+	
 }
 
 
@@ -112,7 +120,7 @@ int mod(int a, int b) {
 	relative sector = ( sector MOD 18 ) + 1
 	head = ( sector / 18 ) MOD 2
 	this is integer division, so the result should be rounded down
-	track = ( sector / 36 )
+	track = ( sinterrupt(0x21,0,"de\0",0,0);ector / 36 )
 */
 
 void readSector(char* buffer, int sector)
@@ -121,6 +129,35 @@ void readSector(char* buffer, int sector)
 	int head = mod(div(sector,18),2);
 	int track = div(sector,36);
 	interrupt(0x13,2*256+1,buffer,track*256+rSector,head*256);
+}
+
+
+void readFile(char* fileName , char* buffer)
+{
+	char directory[512];
+	int i;
+	interrupt(0x21,0,"de\0",0,0);
+	
+	for(i = 0; i < 16; i++)
+	{
+	// 	for(int j = 0; j < 6; j++)
+	// 		if(directory[i*32 + j] != fileName[j])
+	// 		{
+	// 			match = false;
+	// 			break;
+	// 		}
+	// 	if(!match)
+	// 		continue;
+			
+	// 	for(int j = 6; j < 32; j++)
+	// 	{
+	// 		readSector(&buffer + (j - 6)*512),directory[i*32 + j]);
+	// 	}
+
+
+		break;
+	}
+
 }
 
 void handleInterrupt21(int ax, int bx, int cx, int dx)
@@ -132,6 +169,8 @@ void handleInterrupt21(int ax, int bx, int cx, int dx)
 		readString(bx);
 	else if (ax == 2)
 		readSector(bx, cx);
-	else 
+	else if(ax == 3)
+		readFile(bx,cx);
+	else
 		printString("an error message :3");
 }
