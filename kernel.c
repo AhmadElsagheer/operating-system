@@ -48,11 +48,11 @@ int main()
 	// interrupt(0x21,0,line,0,0);
 	// interrupt(0x21,3,line,0,0);
 
-	// char buffer[13312]; 
+	char buffer[13312]; 
 	makeInterrupt21();
-	interrupt(0x21,0,"kammola\0",0,0);
-	// interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
-	// interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
+	
+	interrupt(0x21, 3, "messag\0", buffer, 0); /*read the file into buffer*/
+	interrupt(0x21, 0, buffer, 0, 0); /*print out the file*/
 	
 	while(1); /*hang up*/
 
@@ -135,26 +135,24 @@ void readSector(char* buffer, int sector)
 void readFile(char* fileName , char* buffer)
 {
 	char directory[512];
-	int i;
-	interrupt(0x21,0,"de\0",0,0);
+	int i, j, match;
+	readSector(directory, 2);
 	
-	for(i = 0; i < 16; i++)
+	for ( i = 0; i < 16; i++)
 	{
-	// 	for(int j = 0; j < 6; j++)
-	// 		if(directory[i*32 + j] != fileName[j])
-	// 		{
-	// 			match = false;
-	// 			break;
-	// 		}
-	// 	if(!match)
-	// 		continue;
+		match = 1;
+		for(j = 0; j < 6; j++)
+			if(directory[i*32 + j] != fileName[j])
+			{
+				match = 0;
+				break;
+			}
+		if(!match)
+			continue;
 			
-	// 	for(int j = 6; j < 32; j++)
-	// 	{
-	// 		readSector(&buffer + (j - 6)*512),directory[i*32 + j]);
-	// 	}
-
-
+		for(j = 6; j < 32; j++)
+			readSector(buffer + (j - 6)*512, directory[i*32 + j]);
+		
 		break;
 	}
 
