@@ -16,10 +16,6 @@ int main()
 	terminateString[1] = 0xa;
 	terminateString[2] = '\0';
 	
-	// interrupt(0x21,0, "x", 0, 0);	
-	// interrupt(0x21,0, "y", 0, 0);	
-
-	// interrupt(0x21,0, "z", 0, 0);
 
 
 	while(1)
@@ -30,13 +26,16 @@ int main()
 		
 		
 		i = 0; j = 0;
+		//read the command from the buffer
 		while(buffer[i] != ' ' && buffer[i] != 0xd)
 			command[j++] = buffer[i++];
 		command[j] = '\0';
 
 		j = 0;
+		//make the pointer point to first character of fileName1 in the buffer
 		if(buffer[i] == ' ')
 			++i;
+		//read fileName1 from the buffer
 		while(buffer[i] != ' ' && buffer[i] != 0xd)
 		{
 			fileName1[j] = buffer[i];
@@ -47,22 +46,29 @@ int main()
 		fileName1Tmp[j] = '\0';
 
 		j = 0;
+		//make the pointer point to first character of fileName2 in the buffer
 		if(buffer[i] == ' ')
 			++i;
+		//read fileName2 from the buffer
 		while(buffer[i] != ' ' && buffer[i] != 0xd)
 			fileName2[j++] = buffer[i++];
 		fileName2[j] = '\0';
 		
 		
+
+		//process view command
 		if(equal("view\0", command))
 		{
+			//check if the file name is entered
 			if(fileName1[0] == '\0')
 			{
 				interrupt(0x21, 0, "No file entered", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
+			
 			interrupt(0x21, 3, fileName1, result, 0);
+			//check if the file exists or not
 			if(equal("Error!\0", result))
 			{
 				interrupt(0x21, 0, "File not found", 0, 0);
@@ -70,29 +76,31 @@ int main()
 			}
 			else
 			{
+				//print the file followed by a new line and carriage return
 				interrupt(0x21, 0, result, 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 			}
 		}
+		//process the execute command
 		else if(equal("execute\0", command))
 		{
-			
+			//check if the file name is entered
 			if(fileName1[0] == '\0')
 			{
 				interrupt(0x21, 0, "No file entered", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
-			else{
-				interrupt(0x21, 3, fileName1, result, 0);
-				if(equal("Error!\0", result))
-				{
-					interrupt(0x21, 0, "File not found", 0, 0);
-					interrupt(0x21, 0, terminateString, 0, 0);
-				}
-				else
-					interrupt(0x21, 4, fileName1, 0x2000, 0);
+			//read the file to check if file exists or not
+			interrupt(0x21, 3, fileName1, result, 0);
+			if(equal("Error!\0", result))
+			{
+				interrupt(0x21, 0, "File not found", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
 			}
+			else
+				interrupt(0x21, 4, fileName1, 0x2000, 0);
+			
 		}
 		else if(equal("delete\0", command))
 		{
@@ -110,7 +118,7 @@ int main()
 				interrupt(0x21, 0, terminateString, 0, 0);
 			}
 			else{
-				interrupt(0x21, 7, "message\0", 0, 0);	
+				interrupt(0x21, 7, fileName1, 0, 0);	
 			}
 		}
 		else if(equal("copy\0", command))

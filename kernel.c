@@ -194,7 +194,7 @@ void readFile(char* fileName , char* buffer)
 	for ( i = 0; i < 16; i++)
 	{
 		match = 1;
-		for(j = 0; j < 6 && fileName[j] != '\0'; j++)
+		for(j = 0; j < 6 && (fileName[j] != '\0' || directory[i*32 + j] != 0x00); j++)
 			if(directory[i*32 + j] != fileName[j])
 			{
 				match = 0;
@@ -223,8 +223,9 @@ void executeProgram(char* name, int segment)
 		putInMemory(segment, i, buffer[i]);
 		i++;
 	}
+	printString("");
 	launchProgram(segment);
-
+	printString("");
 }
 
 
@@ -252,7 +253,7 @@ void deleteFile(char* name)
 	for ( i = 0; i < 16; i++)
 	{
 		match = 1;
-		for(j = 0; j < 6; j++)
+		for(j = 0; j < 6 && (name[j] != '\0' || directory[i*32 + j] != 0x00); j++)
 			if(directory[i*32 + j] != name[j])
 			{
 				match = 0;
