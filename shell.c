@@ -102,15 +102,17 @@ int main()
 				interrupt(0x21, 4, fileName1, 0x2000, 0);
 			
 		}
+		//process the delete command
 		else if(equal("delete\0", command))
 		{
-
+			//check if the file name is entered
 			if(fileName1[0] == '\0')
 			{
 				interrupt(0x21, 0, "No file entered", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
+			//read the file to check if the file exists or not
 			interrupt(0x21, 3, fileName1, result, 0);
 			if(equal("Error!\0", result))
 			{
@@ -121,34 +123,40 @@ int main()
 				interrupt(0x21, 7, fileName1, 0, 0);	
 			}
 		}
+		//process the copy command
 		else if(equal("copy\0", command))
 		{
-
+			//check if the file 1 name is entered
 			if(fileName1[0] == '\0')
 			{
 				interrupt(0x21, 0, "File 1 not entered", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
+			//check if the file 2 name is entered
 			else if(fileName2[0] == '\0')
 			{
 				interrupt(0x21, 0, "File 2 not entered", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
+			//read the file
 			interrupt(0x21, 3, fileName1, result, 0);
+			//check if the file exists
 			if(equal("Error!\0", result))
 			{
 				interrupt(0x21, 0, "File not found", 0, 0);
 				interrupt(0x21, 0, terminateString, 0, 0);
 			}
 			else{
+				//count the number of sectors
 				for(j = 0; result[j] != '\0'; j++);
 				j = div(j+511,512);
 
 				interrupt(0x21, 8, fileName2, result, j);	
 			}
 		}
+		//process the dir command
 		else if(equal("dir\0", command))
 		{
 			interrupt(0x21,9,result,0,0);
@@ -156,8 +164,10 @@ int main()
 			interrupt(0x21, 0, terminateString, 0, 0);
 
 		}
+		//process the create command
 		else if(equal("create\0", command))
 		{
+			//check if the file name is entered
 			if(fileName1[0] == '\0')
 			{
 				interrupt(0x21, 0, "No name entered", 0, 0);
@@ -166,9 +176,10 @@ int main()
 			}
 			else
 			{
+
 				c=0;
 				interrupt(0x21, 1, buffer, 0, 0);
-				while(buffer[0] != 0x00 && buffer[0] != '\0' && buffer[0] != 0xd )
+				while(buffer[0] != 0xd )
 				{
 					
 					for (j = 0; buffer[j] != '\0'; ++j)
