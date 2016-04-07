@@ -176,17 +176,18 @@ int main()
 			}
 			else
 			{
-
 				c=0;
+				//read the first line into the buffer
 				interrupt(0x21, 1, buffer, 0, 0);
+				//terminate the loop if the first character in the line is 0xd (carriage return)
 				while(buffer[0] != 0xd )
 				{
-					
+					//copy the buffer into the result
 					for (j = 0; buffer[j] != '\0'; ++j)
 					{
 						result[c++] = buffer[j];
 					}
-					
+					//read the new line into the buffer
 					interrupt(0x21, 1, buffer, 0, 0);
 				}
 				
@@ -197,6 +198,7 @@ int main()
 		}
 		else
 		{
+			//no valid command is entered
 			interrupt(0x21, 0, "Bad command", 0, 0);
 			interrupt(0x21, 0, terminateString, 0, 0);
 		}
@@ -206,12 +208,16 @@ int main()
 	}
 }
 
+
+//check if two strings are equal
 int equal(char* x, char* y)
 {
 	int i;
 	for(i = 0; x[i] != '\0' && x[i] == y[i]; ++i);
 		return x[i] == y[i];
 }
+
+
 
 
 int div(int a, int b)

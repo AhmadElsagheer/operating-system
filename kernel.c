@@ -111,7 +111,9 @@ int main()
 	
 }
 
-
+/**
+* Prompt the user to enter a string, and write the entered text as the user types
+*/
 void readString(char* line){
 	int i = 0;
 	while(1)
@@ -141,6 +143,9 @@ void readString(char* line){
 	interrupt(0x10, 0xE*256+0xd, 0, 0, 0); // carriage return
 }
 
+/*
+* Print a given string to the console
+*/
 void printString(char* chars){
 
 	int i = 0;
@@ -184,6 +189,12 @@ void readSector(char* buffer, int sector)
 }
 
 
+/**
+* Read a file from the disc
+* First look in the directory for a matching file name, if the file is found, 
+* read the file contents from its sectors into the buffer.
+*
+*/
 void readFile(char* fileName , char* buffer)
 {
 	char directory[512];
@@ -212,6 +223,12 @@ void readFile(char* fileName , char* buffer)
 
 }
 
+
+/**
+* Read the file with the given name,
+* put its contents in the memory in the given segment,
+* call launch program
+*/
 void executeProgram(char* name, int segment)
 {
 	char buffer[13312];
@@ -229,11 +246,19 @@ void executeProgram(char* name, int segment)
 }
 
 
+/**
+* Rerun the shell when a running program is terminated
+*/
 void terminateProgram()
 {
-	interrupt(0x21, 4, "shell\0", 0x2000, 0);	
+	interrupt(0x21, 4, "shell\0", 0x2000, 0);
 }
 
+
+/**
+* Write a given buffer in a given sector
+*
+*/
 void writeSector(char* buffer, int sector)
 {
 	int rSector = mod(sector,18) + 1;
@@ -242,6 +267,13 @@ void writeSector(char* buffer, int sector)
 	interrupt(0x13,3*256+1,buffer,track*256+rSector,head*256);
 }
 
+
+/**
+* Delete a file from the disc
+* First search for the file name in the directory,
+* once found, replace the first character with a 0x00 to indicate that this slot is empty
+* remove the sectors of the file from the map
+*/
 void deleteFile(char* name)
 {
 	char map[512];
@@ -273,6 +305,13 @@ void deleteFile(char* name)
 	writeSector(directory, 2);
 }
 
+
+/**
+* Create a file, and add content to it from a given buffer,
+* search the directory for a free slot and add the file name to it,
+* add the file contents to different sectors and remove their availability in the map
+*
+*/
 void writeFile(char* name, char* buffer, int secNum)
 {
 	char map[512];
@@ -314,6 +353,10 @@ void writeFile(char* name, char* buffer, int secNum)
 	}
 }
 
+/**
+* List the contents of the directory,
+* search for non empty file names in the directory, and add them to the result buffer
+*/
 void listDirectory(char* result)
 {
 	char directory[512];
@@ -370,6 +413,10 @@ void handleInterrupt21(int ax, int bx, int cx, int dx)
 }
 
 
+/**
+* Store "Error!" string in the result buffer, to be used in shell commands verification
+*
+*/
 void storeError(char* out)
 {
 	out[0] = 'E';
@@ -382,7 +429,10 @@ void storeError(char* out)
 }
 
 
-
+/**
+* Check if two strings are equal
+*
+*/
 int equal(char* x, char* y)
 {
 	int i;
