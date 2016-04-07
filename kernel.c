@@ -12,6 +12,7 @@ void deleteFile(char*);
 void writeFile(char*, char*, int);
 void storeError( char*);
 int equal(char*, char*);
+void listDirectory(char *);
 
 int main() 
 {
@@ -24,7 +25,7 @@ int main()
 	// for(k = 1; k < 256; ++k)
 	// 	writeSector(clean, k);
 
-	makeInterrupt21();	
+	makeInterrupt21();
 	interrupt(0x21, 4, "shell\0", 0x2000, 0);
 	// char c[80];
 	
@@ -193,7 +194,7 @@ void readFile(char* fileName , char* buffer)
 	for ( i = 0; i < 16; i++)
 	{
 		match = 1;
-		for(j = 0; j < 6; j++)
+		for(j = 0; j < 6 && fileName[j] != '\0'; j++)
 			if(directory[i*32 + j] != fileName[j])
 			{
 				match = 0;
@@ -312,6 +313,32 @@ void writeFile(char* name, char* buffer, int secNum)
 	}
 }
 
+void listDirectory(char* result)
+{
+	char directory[512];
+	int i,j,count;
+	readSector(directory, 2);
+	count = 0;
+	for(i = 0; i<16; i++)
+	{
+		if(directory[i*32] != 0x00)
+		{
+			for(j = 0; j<6; j++)
+			{
+				if(directory[i*32 + j] == 0x00)
+					result[count*7 + j] = ' ';
+				else
+					result[count*7 + j] = directory[i*32 + j];
+			}
+			result[count*7 + j] = ' ';
+			count++;
+			
+
+		}
+	}
+	result[count*7] = '\0';
+}
+
 
 
 void handleInterrupt21(int ax, int bx, int cx, int dx)
@@ -335,6 +362,8 @@ void handleInterrupt21(int ax, int bx, int cx, int dx)
 		deleteFile(bx);
 	else if(ax == 8)
 		writeFile(bx,cx,dx);
+	else if(ax == 9)
+		listDirectory(bx);
 	else
 		storeError(cx);
 }

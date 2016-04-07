@@ -1,4 +1,5 @@
 int equal(char*, char*);
+int div(int, int);
 
 int main()
 {
@@ -10,7 +11,7 @@ int main()
 	char fileName1[25];
 	char fileName1Tmp[25];
 	char terminateString[3];
-	int i, j;
+	int i, j, c;
 	terminateString[0] = 0xd;
 	terminateString[1] = 0xa;
 	terminateString[2] = '\0';
@@ -112,7 +113,74 @@ int main()
 				interrupt(0x21, 7, "message\0", 0, 0);	
 			}
 		}
+		else if(equal("copy\0", command))
+		{
 
+			if(fileName1[0] == '\0')
+			{
+				interrupt(0x21, 0, "File 1 not entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+				continue;
+			}
+			else if(fileName2[0] == '\0')
+			{
+				interrupt(0x21, 0, "File 2 not entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+				continue;
+			}
+			interrupt(0x21, 3, fileName1, result, 0);
+			if(equal("Error!\0", result))
+			{
+				interrupt(0x21, 0, "File not found", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+			}
+			else{
+				for(j = 0; result[j] != '\0'; j++);
+				j = div(j+511,512);
+
+				interrupt(0x21, 8, fileName2, result, j);	
+			}
+		}
+		else if(equal("dir\0", command))
+		{
+			interrupt(0x21,9,result,0,0);
+			interrupt(0x21, 0, result, 0, 0);
+			interrupt(0x21, 0, terminateString, 0, 0);
+
+		}
+		else if(equal("create\0", command))
+		{
+			if(fileName1[0] == '\0')
+			{
+				interrupt(0x21, 0, "No name entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+				continue;
+			}
+			else
+			{
+				c=0;
+				interrupt(0x21, 1, buffer, 0, 0);
+				while(buffer[0] != 0x00 && buffer[0] != '\0' && buffer[0] != 0xd )
+				{
+					
+					for (j = 0; buffer[j] != '\0'; ++j)
+					{
+						result[c++] = buffer[j];
+					}
+					
+					interrupt(0x21, 1, buffer, 0, 0);
+				}
+				
+				result[c-2] = '\0';
+				interrupt(0x21,8,fileName1,result,1);
+			}
+
+		}
+		else
+		{
+			interrupt(0x21, 0, "Bad command", 0, 0);
+			interrupt(0x21, 0, terminateString, 0, 0);
+		}
 
 
 
@@ -126,3 +194,14 @@ int equal(char* x, char* y)
 		return x[i] == y[i];
 }
 
+
+int div(int a, int b)
+{
+	int i = 0;
+	while(a>=b)
+	{
+		a = a - b;
+		i++;
+	}
+	return i;
+}
