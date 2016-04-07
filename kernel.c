@@ -1,5 +1,3 @@
-
-
 void readFile(char*, char*);
 void readString(char*);
 void printString(char*);
@@ -12,9 +10,21 @@ void terminateProgram();
 void writeSector(char*, int);
 void deleteFile(char*);
 void writeFile(char*, char*, int);
+void storeError( char*);
+
 int main() 
 {
+	char buffer[13112];
+	// int k;
+	// char clean[512];
+	// int i;
+	// for(i = 0; i < 512; ++i)
+	// 	clean[i] = 0x00;
+	// for(k = 1; k < 256; ++k)
+	// 	writeSector(clean, k);
 
+	makeInterrupt21();
+	interrupt(0x21, 4, "shell\0", 0x2000, 0);
 	// char c[80];
 	
 	
@@ -70,8 +80,8 @@ int main()
 	// char buffer[13312];
 	// int i;
 	// makeInterrupt21();
-	// interrupt(0x21, 3, "messag\0", buffer, 0); // try to read messag
-	// interrupt(0x21, 0, buffer, 0, 0); //print out the contents of buffer
+	interrupt(0x21, 3, "messag\0", buffer, 0); // try to read messag
+	interrupt(0x21, 0, buffer, 0, 0); //print out the contents of buffer
 	// interrupt(0x21, 7, "messag\0", 0, 0); //delete messag
 	// for(i = 0; i < 13312; ++i)
 	// 	buffer[i] = 0x00;
@@ -177,7 +187,8 @@ void readFile(char* fileName , char* buffer)
 	char directory[512];
 	int i, j, match;
 	readSector(directory, 2);
-	
+
+
 	for ( i = 0; i < 16; i++)
 	{
 		match = 1;
@@ -187,14 +198,16 @@ void readFile(char* fileName , char* buffer)
 				match = 0;
 				break;
 			}
+
 		if(!match)
 			continue;
 	
 		for(j = 6; j < 32; j++)
 			readSector(buffer + (j - 6)*512, directory[i*32 + j]);
-		
-		break;
+		return;
 	}
+	storeError(buffer);
+
 }
 
 void executeProgram(char* name, int segment)
@@ -214,7 +227,7 @@ void executeProgram(char* name, int segment)
 
 void terminateProgram()
 {
-	while(1);	
+	interrupt(0x21, 4, "shelll\0", 0x2000, 0);	
 }
 
 void writeSector(char* buffer, int sector)
@@ -295,14 +308,12 @@ void writeFile(char* name, char* buffer, int secNum)
 			return;
 		}
 	}
-	printString("Error !\0");
-		
 }
 
 
 
 void handleInterrupt21(int ax, int bx, int cx, int dx)
-{
+{	
 
 	if(ax == 0)
 		printString(bx);
@@ -323,5 +334,20 @@ void handleInterrupt21(int ax, int bx, int cx, int dx)
 	else if(ax == 8)
 		writeFile(bx,cx,dx);
 	else
-		printString("an error message :3");
+		storeError(cx);
 }
+
+
+void storeError(char* out)
+{
+	out[0] = 'E';
+	out[1] = 'r';
+	out[2] = 'r';
+	out[3] = 'o';
+	out[4] = 'r';
+	out[5] = '!';
+	out[6] = '\0';
+}
+
+
+
