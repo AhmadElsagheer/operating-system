@@ -9,6 +9,7 @@ as86 lib.asm -o lib.o
 ld86 -o shell -d shell.o lib.o
 ./loadFile shell
 ./loadFile message.txt
+./loadFile tstpr2
 bochs -f conf.bxrc
 
 

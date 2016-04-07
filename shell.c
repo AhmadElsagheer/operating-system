@@ -1,15 +1,19 @@
 int equal(char*, char*);
-void consoleLog(char*);
 
 int main()
 {
 	char buffer[150];
 	char command[50];
-	char fileName1[50];
-	char fileName2[50];
-	char result[13112];
-	int i, j;
 	
+	char fileName2[50];
+	char result[13000];
+	char fileName1[25];
+	char fileName1Tmp[25];
+	char terminateString[3];
+	int i, j;
+	terminateString[0] = 0xd;
+	terminateString[1] = 0xa;
+	terminateString[2] = '\0';
 	
 	// interrupt(0x21,0, "x", 0, 0);	
 	// interrupt(0x21,0, "y", 0, 0);	
@@ -33,8 +37,13 @@ int main()
 		if(buffer[i] == ' ')
 			++i;
 		while(buffer[i] != ' ' && buffer[i] != 0xd)
-			fileName1[j++] = buffer[i++];
+		{
+			fileName1[j] = buffer[i];
+			fileName1Tmp[j++] = buffer[i++];
+
+		}
 		fileName1[j] = '\0';
+		fileName1Tmp[j] = '\0';
 
 		j = 0;
 		if(buffer[i] == ' ')
@@ -43,21 +52,67 @@ int main()
 			fileName2[j++] = buffer[i++];
 		fileName2[j] = '\0';
 		
-		// consoleLog(command);
+		
 		if(equal("view\0", command))
 		{
 			if(fileName1[0] == '\0')
 			{
-				consoleLog("No File entered.\0");
+				interrupt(0x21, 0, "No file entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
 				continue;
 			}
 			interrupt(0x21, 3, fileName1, result, 0);
 			if(equal("Error!\0", result))
-				consoleLog("File Not Found.\0");
+			{
+				interrupt(0x21, 0, "File not found", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+			}
 			else
-				consoleLog(result);
+			{
+				interrupt(0x21, 0, result, 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+			}
 		}
-		else if(equal("view\0", command))
+		else if(equal("execute\0", command))
+		{
+			
+			if(fileName1[0] == '\0')
+			{
+				interrupt(0x21, 0, "No file entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+				continue;
+			}
+			else{
+				interrupt(0x21, 3, fileName1, result, 0);
+				if(equal("Error!\0", result))
+				{
+					interrupt(0x21, 0, "File not found", 0, 0);
+					interrupt(0x21, 0, terminateString, 0, 0);
+				}
+				else
+					interrupt(0x21, 4, fileName1, 0x2000, 0);
+			}
+		}
+		else if(equal("delete\0", command))
+		{
+
+			if(fileName1[0] == '\0')
+			{
+				interrupt(0x21, 0, "No file entered", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+				continue;
+			}
+			interrupt(0x21, 3, fileName1, result, 0);
+			if(equal("Error!\0", result))
+			{
+				interrupt(0x21, 0, "File not found", 0, 0);
+				interrupt(0x21, 0, terminateString, 0, 0);
+			}
+			else{
+				interrupt(0x21, 7, "message\0", 0, 0);	
+			}
+		}
+
 
 
 
@@ -68,17 +123,6 @@ int equal(char* x, char* y)
 {
 	int i;
 	for(i = 0; x[i] != '\0' && x[i] == y[i]; ++i);
-	return x[i] == y[i];
+		return x[i] == y[i];
 }
 
-void consoleLog(char* feedback)
-{
-	int i = 0;
-	while(feedback[i] != '\0')
-		++i;
-	feedback[i++] = 0xd;
-	feedback[i++] = 0xa;
-	feedback[i] = '\0';
-	interrupt(0x21, 0, feedback, 0, 0);
-	feedback[i-2] = '\0';
-}

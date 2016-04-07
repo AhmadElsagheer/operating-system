@@ -11,6 +11,7 @@ void writeSector(char*, int);
 void deleteFile(char*);
 void writeFile(char*, char*, int);
 void storeError( char*);
+int equal(char*, char*);
 
 int main() 
 {
@@ -23,7 +24,7 @@ int main()
 	// for(k = 1; k < 256; ++k)
 	// 	writeSector(clean, k);
 
-	makeInterrupt21();
+	makeInterrupt21();	
 	interrupt(0x21, 4, "shell\0", 0x2000, 0);
 	// char c[80];
 	
@@ -222,12 +223,13 @@ void executeProgram(char* name, int segment)
 		i++;
 	}
 	launchProgram(segment);
+
 }
 
 
 void terminateProgram()
 {
-	interrupt(0x21, 4, "shelll\0", 0x2000, 0);	
+	interrupt(0x21, 4, "shell\0", 0x2000, 0);	
 }
 
 void writeSector(char* buffer, int sector)
@@ -351,3 +353,9 @@ void storeError(char* out)
 
 
 
+int equal(char* x, char* y)
+{
+	int i;
+	for(i = 0; x[i] != '\0' && x[i] == y[i]; ++i);
+	return x[i] == y[i];
+}
